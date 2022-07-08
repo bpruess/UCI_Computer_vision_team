@@ -6,6 +6,7 @@ Created on Thu Jun 23 12:59:04 2022
 @author: bryantchung
 """
 
+#import packages
 import cv2   
 import imutils
 import numpy as np
@@ -23,6 +24,7 @@ from skimage.morphology import closing, square
 from skimage.color import label2rgb
 from itertools import chain
 
+#function for implementing video 
 def FrameCapture(path):
     vidObj = cv2.VideoCapture(path)
   
@@ -42,7 +44,137 @@ def FrameCapture(path):
         
     return X_data
 
-#what does that even mean
+#function for finding the closest X points near the snout 
+def pointfinder(plane, index):
+    minidx = []
+    primeindex=list(chain.from_iterable(c[:, :, plane]))
+    #gets list of desired coordinates (0 if looking right to left and 1 if looking top to bottom--yes this logic works)
+    #print("list of prime coordinates")
+    #print(primeindex)
+    #referenceindex=list(chain.from_iterable(c[:, :, 1]))
+    #print("list of reference coordinates")
+    #print(referenceindex)
+    primeindexuse=np.argsort(primeindex)
+    #index=1 means finding top points
+    if index==1:
+        reverse=list(reversed(primeindexuse))
+        for i in reverse[:10]:
+                minidx.append(i)
+    elif index==0:
+        primeindexiter=list(primeindexuse)
+        for j in primeindexiter[:10]:
+            minidx.append(j)
+    #print(minidx)
+    pointslist=[]
+    #for top to bottom 
+    for index in minidx:
+            #iterates through indices
+# =============================================================================
+#                     print("x coordinate")
+#                     print(primeindexuse[index])
+# =============================================================================
+            use3=list(chain.from_iterable(c[:, :, :]))
+            #gets x and y arrays?
+            point = use3[index]
+            #finds y coordinate associated with x coordinate (bye)
+            pointslist.append(point)
+            #print("full point")
+            #print(point)
+            #this prints the whole point
+    #print("all points list")
+    #print(pointslist)
+    return pointslist
+    
+#for first four frames...
+#proper results should be 176,176,175,175,174 for top
+#proper results for bottom should be 71,71,72.73.75 or smth
+#proper results for right should be 353,353,352,352,352
+#proper results for left should be 316,316,317,317,317
+
+#function for confirming location of snout using triangular analysis
+def confirmsnout(snout):
+    if snout == extRight:
+        print("final snout designation")
+        print("right")
+        iterate = pointfinder(0, 1)
+        for point in iterate:
+             for point2 in iterate:
+                if (point[1]>snout[1] and point2[1]<snout[1]) or (point[1]<snout[1] and point2[1]>snout[1]):
+                #so if above or below the "snout" area -- same for R and L 
+                    #print("right")
+                    angle=findangle(point, point2)
+                    if angle is not None:
+                        print(angle)
+    elif snout==extLeft:
+        print("final snout designation")
+        print("left")
+        iterate = pointfinder(0, 0)
+        for point in iterate:
+            #print(point)
+            for point2 in iterate:
+                #print(point2)
+                if (point[1]>snout[1] and point2[1]<snout[1]) or (point[1]<snout[1] and point2[1]>snout[1]):
+                    #print("left")
+                    angle=findangle(point, point2)
+                    if angle is not None:
+                        print(angle)
+    elif snout==extBot:
+        print("final snout designation")
+        print("bot")
+        iterate = pointfinder(1, 1)
+        for point in iterate:
+            #print(point)
+            for point2 in iterate:
+                #print(point2)
+                if (point[0]>snout[0] and point2[0]<snout[0]) or (point[0]<snout[0] and point2[0]>snout[0]):
+                #so if to left or to right -- same for T & B
+# =============================================================================
+#                     print("chosenpoints")
+#                     print(point)
+#                     print(point2)
+# =============================================================================
+                    angle=findangle(point, point2)
+                    if angle is not None:
+                        print(angle)
+    elif snout==extTop:
+        print("final snout designation")
+        print("top")
+        iterate = pointfinder(1, 0)
+        for point in iterate:
+             for point2 in iterate:
+                if (point[0]>snout[0] and point2[0]<snout[0]) or (point[0]<snout[0] and point2[0]>snout[0]):
+                    #print("top")
+                    angle=findangle(point, point2)
+                    if angle is not None:
+                        print(angle)
+
+#function for calculating the angle using dot product stuff 
+def findangle(point, point2):
+    a=point
+    b=snout
+    c = point2
+    #shuffling around doesn't rlly change anything besides angle values 
+    ba = a - b
+    bc = c - b
+    cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+    radangle = np.arccos(cosine_angle)
+    degangle=radangle*57.2958
+    #converts to degrees
+    #print(degangle)
+    if degangle<= 90:
+        #print("it works!")
+# =============================================================================
+#         print(a)
+#         print(b)
+#         print(c)
+#         print(ba)
+#         print(bc)
+#         print(cosine_angle)
+# =============================================================================
+        return degangle
+
+#THIS IS THE ACTUAL CODE NOW
+#iterates through images? 
 if __name__ == '__main__':
     X_data_array = FrameCapture("/Users/bryantchung/Downloads/ExtraCurricular/UCI Summer 2022/mousevid.wmv")
     left1images = []
@@ -102,7 +234,7 @@ if __name__ == '__main__':
         right3images.append(r3)
         
     
-   
+   #iterates through four images (so all analysis code for each frame is embedded in this for loop)
     for i in range(0,4):
         
         dst = left1images[i]
@@ -126,8 +258,8 @@ if __name__ == '__main__':
 # =============================================================================
         c = max(cnts, key=cv2.contourArea)
 
-        print("max contour")
-        print(c)
+        #print("max contour")
+        #print(c)
 
         #nested lists (two additional layers?)
         #gets the biggest contour
@@ -140,226 +272,33 @@ if __name__ == '__main__':
         #ah no i get it the first two :: say get all of the lists and then the 0 means get the x value
         #[0] = vertical height is 0?, no axis size is just 0 just ignore that
         #tuple = ordered list that you can't change 
-        #basically have to manipulate so gives a cluster of points in that region 
-       
-# =============================================================================
-#         print("extleft")
-#         print(extLeft)
-# =============================================================================
-
-        minidx = []
-        
-        print("list of prime coordinates")
-        primeindex=list(chain.from_iterable(c[:, :, 0]))
-        #gets list of desired coordinates (0 if looking right to left and 1 if looking top to bottom--yes this logic works)
-        print(primeindex)
-        print("list of reference coordinates")
-        referenceindex=list(chain.from_iterable(c[:, :, 1]))
-        print(referenceindex)
-        
-        print("sorted list")
-        primeindexuse=np.argsort(primeindex)
-        print("reversed list")
-        index=1
-        #index=1 means finding top points
-        if index==1:
-            reverse=list(reversed(primeindexuse))
-            for i in reverse[:5]:
-                    minidx.append(i)
-            #yup this works!!!
-        elif index==0:
-            primeindexiter=list(primeindexuse)
-            for j in primeindexiter[:5]:
-                minidx.append(j)
-                
-#old code
-# =============================================================================
-#         for cluster in xindexuse:
-#             print(cluster)
-#             minidx.append(np.argsort(xindexuse)[:5])
-#         #print first three x coordinate indices
-# =============================================================================
-        print(minidx)
-        pointslist=[]
-        #for top to bottom 
-        for hi in minidx:
-                #iterates through indices
-                print("x coordinate")
-                print(primeindexuse[hi])
-                use3=list(chain.from_iterable(c[:, :, :]))
-                #gets x and y arrays?
-# =============================================================================
-#                 print("list of all points")
-#                 print(use3)
-# =============================================================================
-                y = use3[hi]
-                #finds y coordinate associated with x coordinate (bye)
-                print("full point")
-                pointslist.append(y)
-                print(y)
-                #this prints the whole point
-        print("all points list")
-        print(pointslist)
-               
-#old method before using list()
-# =============================================================================
-#         for hi in minidx[:1]:
-#             #okay for this method there's not that many indices for some reason 
-#             #idk way too manny arrays in minidx for some reaosn 
-#             #gets all of the indices
-#             for bye in hi:
-#                 #iterates through indices
-#                 print("x coordinate")
-#                 print(primeindexuse[bye])
-#                 use3=list(chain.from_iterable(c[:, :, :]))
-#                 #gets x and y arrays?
-# # =============================================================================
-# #                 print("list of all points")
-# #                 print(use3)
-# # =============================================================================
-#                 y = use3[bye]
-#                 #finds y coordinate associated with x coordinate (bye)
-#                 print("full point")
-#                 pointslist.append(y)
-#                 print(y)
-#                 #oh shit les go this prints the whole point okay so i got the points of the lowest three x values 
-#         print("all points list")
-#         print(pointslist)
-#                 #prints lowest three x coordinates
-# =============================================================================
-                
-        
-        #proper results should be 176,176,175,175,174 for top
-        #proper results for bottom should be 71,71,72.73.75 or smth
-        #proper results for right should be 353,353,352,352,352
-        #proper results for left should be 316,316,317,317,317
-        #yes this works for all
-        #okay this works for finding the top coordinates and bottom ones now
-
-        
-        #okay imma make this all a function now 
-        def pointfinder(plane, index):
-            minidx = []
-            #print("list of prime coordinates")
-            primeindex=list(chain.from_iterable(c[:, :, plane]))
-            #gets list of desired coordinates (0 if looking right to left and 1 if looking top to bottom--yes this logic works)
-            #print(primeindex)
-            #print("list of reference coordinates")
-            #referenceindex=list(chain.from_iterable(c[:, :, 1]))
-            #print(referenceindex)
-            
-            #print("sorted list")
-            primeindexuse=np.argsort(primeindex)
-            #print("reversed list")
-            #index=1 means finding top points
-            if index==1:
-                reverse=list(reversed(primeindexuse))
-                for i in reverse[:20]:
-                        minidx.append(i)
-                #yup this works!!!
-            elif index==0:
-                primeindexiter=list(primeindexuse)
-                for j in primeindexiter[:20]:
-                    minidx.append(j)
-            #print(minidx)
-            pointslist=[]
-            #for top to bottom 
-            for hi in minidx:
-                    #iterates through indices
-# =============================================================================
-#                     print("x coordinate")
-#                     print(primeindexuse[hi])
-# =============================================================================
-                    use3=list(chain.from_iterable(c[:, :, :]))
-                    #gets x and y arrays?
-                    y = use3[hi]
-                    #finds y coordinate associated with x coordinate (bye)
-                    #print("full point")
-                    pointslist.append(y)
-                    #print(y)
-                    #this prints the whole point
-            #print("all points list")
-            print(pointslist)
-            return pointslist
-            
-            
-           #proper results should be 176,176,175,175,174 for top
-        #proper results for bottom should be 71,71,72.73.75 or smth
-        #proper results for right should be 353,353,352,352,352
-        #proper results for left should be 316,316,317,317,317
-        #yes this works for all
-        #okay this works for finding the top coordinates and bottom ones now
-            
-            
-                
-#old code
-# =============================================================================
-#             minidx=[]
-#             print("list of x coordinates")
-#             use=list(chain.from_iterable(c[:, :, plane]))
-#             #gets list of just x values
-#             print(use)
-#             use2=list(chain.from_iterable(c[:, :, planeother]))
-#             print(use2)
-#             
-#             print("sorted list")
-#             print(np.argsort(use))
-#             if index==1:
-#                 reversed(use)
-#             #orders index of x values
-#             #idk adds the first three of use
-#             for cluster in use:
-#                 print(cluster)
-#                 minidx.append(np.argsort(use)[:5])
-#             #print first three x coordinate indices
-#             print(minidx)
-#             pointslist=[]
-#             for hi in minidx[:1]:
-#                 #idk way too manny arrays in minidx for some reaosn 
-#                 #gets all of the indices
-#                 for bye in hi:
-#                     #iterates through indices
-#                     print("x coordinate")
-#                     print(use[bye])
-#                     use3=list(chain.from_iterable(c[:, :, :]))
-#                     #gets x and y arrays?
-#     # =============================================================================
-#     #                 print("list of all points")
-#     #                 print(use3)
-#     # =============================================================================
-#                     point = use3[bye]
-#                     #finds y coordinate associated with x coordinate (bye)
-#                     print("full point")
-#                     pointslist.append(point)
-#                     print(point)
-#             print(pointslist)
-#             
-# =============================================================================
+        #basically have to manipulate so gives a cluster of points in that region     
   
         
         #yields the entire extreme coordinate
         extLeft = tuple(c[c[:, :, 0].argmin()][0])
-        print("left coordinates")
+        #print("left coordinates")
         pointfinder(0, 0)
         extRight = tuple(c[c[:, :, 0].argmax()][0])
-        print("right coordinates")
+        #print("right coordinates")
         pointfinder(0, 1)
         #1 = vertical
         extTop = tuple(c[c[:, :, 1].argmin()][0])
-        print("top coordinates")
+        #print("top coordinates")
         pointfinder(1,1)
         extBot = tuple(c[c[:, :, 1].argmax()][0])
-        print("bottom coordinates")
+        #print("bottom coordinates")
         pointfinder(1, 0)
-        #pointfiner function works
-        print("extleft")
-        print(extLeft[0])
-        print("extright")
-        print(extRight[0])
-        print("exttop")
-        print(extTop[1])
-        print("extbot")
-        print(extBot[1])
+
+# =============================================================================
+#         print(extLeft[0])
+#         #print("extright")
+#         print(extRight[0])
+#         print("exttop")
+#         print(extTop[1])
+#         print("extbot")
+#         print(extBot[1])
+# =============================================================================
         # draw the outline of the object, then draw each of the
         # extreme points, where the left-most is red, right-most
         # is green, top-most is blue, and bottom-most is teal
@@ -376,7 +315,7 @@ if __name__ == '__main__':
         cv2.imshow("opp", img_not)
         cv2.imshow("Image", dst)
         
-        print(dst.shape)
+        #print(dst.shape)
         #isolating rats by subtracting median
         medio = np.median(left1images, 0)
         plt.imshow(medio.astype(np.uint8))
@@ -415,88 +354,74 @@ if __name__ == '__main__':
                 rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
                                       fill=False, edgecolor='red', linewidth=2)
                 ax.add_patch(rect)
+                #yea what is going on with this
+                print("DIMENSIONS")
                 print(minc)
+                #this is min x value
                 print(maxc)
+                #this is max x value
                 print(minr)
+                #this is min y value
                 print(maxr)
+                #this is max y value
+                #isnt this code supposed to exclude the tail 
         
         #final snout calculation
         snout = (0, 0)
         if abs(extLeft[0] - minc) > 20:
             snout = extRight
+            print("RIGHT")
         if abs(extRight[0] - maxc) > 20:
             snout = extLeft
+            print("LEFT")
         if abs(extTop[0] - minr) > 20:
             snout = extBot
+            print("BOT")
         if abs(extBot[0] - maxr) > 20:
             snout = extTop
+            print("TOP")
         print("snout")
         print(snout)
+        #this algorithm is faulty since it can register as both bot/top and right/left
+        #kk i fixed this with elif -- no this changes the angle and makes it weird
+        #first image...top would be the most accurate...but it basically designates that it's top bc luck 
+        #the thing is triangular analysis would fail if tail included bc tail would also be a sharp angle 
+        #second image...bot turned out to be better..again luck of the draw
+        #this one is less clear...but it shouldn't rlly matter for triangular analysis anyways 
+        #actually bot is best... triangular analysis should also confirm this? 
+        #angle would be too wide if chosen as most left...actually  maybe it wont since two similar circular shapes
+        #third image is just inaccurate
+        #fourth image should be left? -- yea but triangular analysis confirmed this was indeed not the snout
+        #probs better to have an algorithm that sees which distance is the shortest
+        #or maybe go for a value lower than 20
+        #print("confirmanalysis")
+        confirmsnout(snout)       
 
-#if snout location known using tail algorithm (probs most cases tbh) 
-#then just start from point of snout and iterate two points to right each time to calculate angles 
-#problematic if rat is facing upwards or downwards (code basically relies on rat being horizontal) 
-#but for most cases think itll be fine
-#kinda iffy with making sure points on opposite side but can guess for now and add midpoints later probs
+#triangular analysis for snout
 
-a=snout
-if snout == extRight:
-    iterate = pointfinder(0, 1)
-    for point in iterate:
-        print("rightpoints")
-        print(point)
-elif snout==extLeft:
-    iterate = pointfinder(0, 0)
-    for point in iterate:
-        print("leftpoints")
-        print(point)
-elif snout==extBot:
-    iterate = pointfinder(1, 1)
-    #okay yes correct correlations with top and bottom -- bottom is actually higher points 
-    #so under my algorithm's logic have to use 1 or top coordinate function
-    for point in iterate:
-        print("botpoints")
-        print(point)
-elif snout==extTop:
-    iterate = pointfinder(1, 0)
-    for point in iterate:
-        print("toppoints")
-        print(point)
-
-# =============================================================================
-# def confirmsnout(snout):
-#     clist=list(chain.from_iterable(c[:, :, :]))
-#     coordinates = clist[snout]
-#     if snout == extRight:
-#     elif snout==extLeft:
-#     elif snout==extBot:
-#     elif snout==extTop:
-# =============================================================================
-
-#add another function for iterating through the points and whatnot 
-    
-    
-
-
-
-#if snout location unknown bc tail not visible or smth 
-#then first check if rat more vertically or horizontally aligned 
-#then iterate to right/left or top/bottom accordingly (extreme ends) to check angles 
-            
-#triangular analysis confirmation
-a = np.array([6,0])
-b = np.array([0,0])
-c = np.array([0,6])
-
+a = np.array([155, 200])
+b = np.array([140, 210]) #b has to be the snout area 
+c = np.array([155, 225])
+#78.69 degrees
 ba = a - b
 bc = c - b
+# =============================================================================
+# print(ba)
+# print(bc)
+# =============================================================================
 
 cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+#print(cosine_angle)
 angle = np.arccos(cosine_angle)
+#print(angle)
 
-print(np.degrees(angle))
+
+print("target angle")
+print(angle*57.2958)
         
-print(snout)
+
+#print(snout)
+
 ax.set_axis_off()
 plt.tight_layout()
 plt.show()
