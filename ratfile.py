@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jun 23 12:59:04 2022
-
 @author: bryantchung
 """
 
@@ -176,7 +175,7 @@ def findangle(point, point2):
 #THIS IS THE ACTUAL CODE NOW
 #iterates through images? 
 if __name__ == '__main__':
-    X_data_array = FrameCapture("/Users/bryantchung/Downloads/ExtraCurricular/UCI Summer 2022/mousevid.wmv")
+    X_data_array = FrameCapture("pyvideos/mousevid.wmv")
     left1images = []
     left2images = []
     right3images = []
@@ -397,34 +396,33 @@ if __name__ == '__main__':
         #print("confirmanalysis")
         confirmsnout(snout)       
 
-#triangular analysis for snout
-
-a = np.array([155, 200])
-b = np.array([140, 210]) #b has to be the snout area 
-c = np.array([155, 225])
-#78.69 degrees
-ba = a - b
-bc = c - b
-# =============================================================================
-# print(ba)
-# print(bc)
-# =============================================================================
-
-cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-#print(cosine_angle)
-angle = np.arccos(cosine_angle)
-#print(angle)
-
-
-print("target angle")
-print(angle*57.2958)
+        #triangular analysis for snout
+    
+        a = np.array([155, 200])
+        b = np.array([140, 210]) #b has to be the snout area 
+        c = np.array([155, 225])
+        #78.69 degrees
+        ba = a - b
+        bc = c - b
+        # =============================================================================
+        # print(ba)
+        # print(bc)
+        # =============================================================================
+    
+        cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+        #print(cosine_angle)
+        angle = np.arccos(cosine_angle)
+        #print(angle)
         
-
-#print(snout)
-
-ax.set_axis_off()
-plt.tight_layout()
-plt.show()
+        
+        print("target angle")
+        print(angle*57.2958)
+                
+        
+        #print(snout)
+        
+        ax.set_axis_off()
+        plt.tight_layout()
+        plt.show()
 cv2.waitKey(1)
-        
         
