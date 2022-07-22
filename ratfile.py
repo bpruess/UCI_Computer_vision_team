@@ -212,7 +212,7 @@ if __name__ == '__main__':
         #rotate image to 90 COUNTERCLOCKWISE
         l1 = cv2.rotate(l1, cv2.ROTATE_90_COUNTERCLOCKWISE)
         #save
-        l1 = l1[80:360, 200:600]
+        l1 = l1[80:400, 200:650]
         left1images.append(l1)
         
         #rotate image RIGHT1 to 90 CLOCKWISE
