@@ -177,60 +177,12 @@ def findangle(point, point2):
 if __name__ == '__main__':
     X_data_array = FrameCapture("pyvideos/mousevid.wmv")
     left1images = []
-    left2images = []
-    right3images = []
-    right4images = []
     #iterates through the images
     for i in range(0,len(X_data_array)):
+        for i in range(0,len(X_data_array)):
         img = X_data_array[i]
-        # load image
-    
-        # start vertical devide image
-        height = img.shape[0]
-        width = img.shape[1]
-        # Cut the image in half
-        width_cutoff = width // 2
-        left1 = img[:, :width_cutoff]
-        right1 = img[:, width_cutoff:]
-        # finish vertical devide image
-        
-        #rotate image LEFT1 to 90 CLOCKWISE -- why?
-        img = cv2.rotate(left1, cv2.ROTATE_90_CLOCKWISE)
-        # start vertical devide image
-        height = img.shape[0]
-        width = img.shape[1]
-        # Cut the image in half
-        width_cutoff = width // 2
-        l2 = img[:, :width_cutoff]
-        l1 = img[:, width_cutoff:]
-        # finish vertical devide image
-        #rotate image to 90 COUNTERCLOCKWISE
-        l2 = cv2.rotate(l2, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        #save
-        left2images.append(l2)
-        #rotate image to 90 COUNTERCLOCKWISE
-        l1 = cv2.rotate(l1, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        #save
-        l1 = l1[80:400, 200:650]
-        left1images.append(l1)
-        
-        #rotate image RIGHT1 to 90 CLOCKWISE
-        img = cv2.rotate(right1, cv2.ROTATE_90_CLOCKWISE)
-        # start vertical devide image
-        height = img.shape[0]
-        width = img.shape[1]
-        # Cut the image in half
-        width_cutoff = width // 2
-        r4 = img[:, :width_cutoff]
-        r3 = img[:, width_cutoff:]
-        # finish vertical devide image
-        #rotate image to 90 COUNTERCLOCKWISE
-        r4 = cv2.rotate(r4, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        #save
-        right4images.append(r4)
-        #rotate image to 90 COUNTERCLOCKWISE
-        r3 = cv2.rotate(r3, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        right3images.append(r3)
+        img = img[100:400, 200:650]
+        left1images.append(img)
         
     
    #iterates through four images (so all analysis code for each frame is embedded in this for loop)
