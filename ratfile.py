@@ -177,6 +177,7 @@ def findangle(point, point2):
 if __name__ == '__main__':
     X_data_array = FrameCapture("pyvideos/mousevid.wmv")
     left1images = []
+    fincoords = []
     #iterates through the images
     for i in range(0,len(X_data_array)):
         for i in range(0,len(X_data_array)):
@@ -333,6 +334,7 @@ if __name__ == '__main__':
             print("TOP")
         print("snout")
         print(snout)
+        fincoords.append(snout)
         #this algorithm is faulty since it can register as both bot/top and right/left
         #kk i fixed this with elif -- no this changes the angle and makes it weird
         #first image...top would be the most accurate...but it basically designates that it's top bc luck 
@@ -376,5 +378,6 @@ if __name__ == '__main__':
         ax.set_axis_off()
         plt.tight_layout()
         plt.show()
+print(fincoords)
 cv2.waitKey(1)
         
