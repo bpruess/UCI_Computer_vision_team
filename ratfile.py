@@ -319,17 +319,28 @@ if __name__ == '__main__':
                 #isnt this code supposed to exclude the tail 
         
         #final snout calculation
+        print("------------------------------")
+        print(extLeft[0])
+        print(extRight[0])
+        print(extTop[1])
+        print(extBot[1])
+        print("------------------------------")
         snout = (0, 0)
-        if abs(extLeft[0] - minc) > 20:
+        differences = [abs(extLeft[0] - minc), abs(extRight[0] - maxc), abs(extTop[1] - minr), abs(extBot[1] - maxr)]
+        print(differences)
+        differences.sort()
+        
+        
+        if abs(extLeft[0] - minc) == differences[3]:
             snout = extRight
             print("RIGHT")
-        if abs(extRight[0] - maxc) > 20:
+        elif abs(extRight[0] - maxc) == differences[3]:
             snout = extLeft
             print("LEFT")
-        if abs(extTop[0] - minr) > 20:
+        elif abs(extTop[1] - minr) == differences[3]:
             snout = extBot
             print("BOT")
-        if abs(extBot[0] - maxr) > 20:
+        elif abs(extBot[1] - maxr) == differences[3]:
             snout = extTop
             print("TOP")
         print("snout")
